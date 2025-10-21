@@ -31,12 +31,81 @@ def main(page: ft.Page):
 
     # TextField per responsabile
     input_responsabile = ft.TextField(value=autonoleggio.responsabile, label="Responsabile")
+    def conferma_responsabile(e):
+        autonoleggio.responsabile = input_responsabile.value
+        txt_responsabile.value = f"Responsabile: {autonoleggio.responsabile}"
+        page.update()
+    pulsante_conferma_responsabile = ft.ElevatedButton("Conferma", on_click=conferma_responsabile)
 
     # ListView per mostrare la lista di auto aggiornata
     lista_auto = ft.ListView(expand=True, spacing=5, padding=10, auto_scroll=True)
 
     # Tutti i TextField per le info necessarie per aggiungere una nuova automobile (marca, modello, anno, contatore posti)
     # TODO
+    # Sezione 3: Aggiunta auto
+    lbl_aggiungi=ft.Text(value="aggiungi nuova automobile", size=20)
+    marca_input = ft.TextField(label="Marca", width=150)
+    modello_input = ft.TextField(label="Modello", width=150)
+    anno_input = ft.TextField(label="Anno", width=100)
+    contatore=ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=100)
+
+
+    def minus_click(e):
+        contatore.value = str(int(contatore.value) - 1)
+        page.update()
+
+    def plus_click(e):
+        contatore.value = str(int(contatore.value) + 1)
+        page.update()
+
+    page.add(
+        ft.Row(
+            [
+                ft.IconButton(ft.Icons.REMOVE, on_click=minus_click),
+                contatore.value,
+                ft.IconButton(ft.Icons.ADD, on_click=plus_click),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER, spacing=10
+        )
+    )
+
+    btn_aggiungi_auto = ft.ElevatedButton("Aggiungi Automobile")
+    def aggiungi_auto(e):
+        marca = marca_input.value.strip()
+        modello = modello_input.value.strip()
+        anno = anno_input.value.strip()
+        posti = contatore.value.strip()
+
+        if not marca or not modello or not anno or not posti:
+            alert.show_alert("Tutti i campi devono essere compilati.")
+            return
+
+        try:
+            anno = int(anno)
+        except ValueError:
+            alert.show_alert("Il campo 'Anno' deve essere un numero intero.")
+            return
+
+        try:
+            posti = int(posti)
+        except ValueError:
+            alert.show_alert("Il numero di posti deve essere un numero intero.")
+            return
+
+        try:
+            autonoleggio.aggiungi_automobile(marca, modello, anno, posti)
+            marca_input.value = ""
+            modello_input.value = ""
+            anno_input.value = ""
+            contatore.value = "0"
+            aggiorna_lista_auto()
+            page.update()
+        except Exception as ex:
+            alert.show_alert(f"Errore durante l'aggiunta: {ex}")
+
+    btn_aggiungi_auto = ft.ElevatedButton("Aggiungi Automobile", on_click=aggiungi_auto)
+
+    # --- FUNZIONI ---
 
     # --- FUNZIONI APP ---
     def aggiorna_lista_auto():
@@ -84,6 +153,13 @@ def main(page: ft.Page):
 
         # Sezione 3
         # TODO
+        ft.Divider(),
+        ft.Text("aggiungi automobile", size=20),
+        ft.Row(spacing=50,
+               controls=[marca_input, modello_input, anno_input, contatore],
+               alignment=ft.MainAxisAlignment.CENTER),
+        btn_aggiungi_auto,
+
 
         # Sezione 4
         ft.Divider(),
