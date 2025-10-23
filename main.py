@@ -58,52 +58,6 @@ def main(page: ft.Page):
         contatore.value = str(int(contatore.value) + 1)
         page.update()
 
-    page.add(
-        ft.Row(
-            [
-                ft.IconButton(ft.Icons.REMOVE, on_click=minus_click),
-                contatore.value,
-                ft.IconButton(ft.Icons.ADD, on_click=plus_click),
-            ],
-            alignment=ft.MainAxisAlignment.CENTER, spacing=10
-        )
-    )
-
-    btn_aggiungi_auto = ft.ElevatedButton("Aggiungi Automobile")
-    def aggiungi_auto(e):
-        marca = marca_input.value.strip()
-        modello = modello_input.value.strip()
-        anno = anno_input.value.strip()
-        posti = contatore.value.strip()
-
-        if not marca or not modello or not anno or not posti:
-            alert.show_alert("Tutti i campi devono essere compilati.")
-            return
-
-        try:
-            anno = int(anno)
-        except ValueError:
-            alert.show_alert("Il campo 'Anno' deve essere un numero intero.")
-            return
-
-        try:
-            posti = int(posti)
-        except ValueError:
-            alert.show_alert("Il numero di posti deve essere un numero intero.")
-            return
-
-        try:
-            autonoleggio.aggiungi_automobile(marca, modello, anno, posti)
-            marca_input.value = ""
-            modello_input.value = ""
-            anno_input.value = ""
-            contatore.value = "0"
-            aggiorna_lista_auto()
-            page.update()
-        except Exception as ex:
-            alert.show_alert(f"Errore durante l'aggiunta: {ex}")
-
-    btn_aggiungi_auto = ft.ElevatedButton("Aggiungi Automobile", on_click=aggiungi_auto)
 
     # --- FUNZIONI ---
 
@@ -128,13 +82,37 @@ def main(page: ft.Page):
 
     # Handlers per la gestione dei bottoni utili all'inserimento di una nuova auto
     # TODO
-
+    def clicca_bottone(e):
+        marca=marca_input.value
+        modello=modello_input.value
+        try:
+            anno=int(anno_input.value)
+            num_posti=int(contatore.value)
+            if marca_input.value.isdigit() or modello_input.value.isdigit():
+                alert.show_alert("marca e modello devono contenere un testo, non numeri")
+                return
+            autonoleggio.aggiungi_automobile(marca, modello, anno, num_posti)
+            aggiorna_lista_auto()
+            marca_input.value=""
+            modello_input.value=""
+            anno_input.value=""
+            contatore.value="0"
+            page.update()
+        except ValueError:
+            alert.show_alert("anno e numero di posti devono essere un numero")
+            aggiorna_lista_auto()
+            marca_input.value=""
+            modello_input.value=""
+            anno_input.value=""
+            page.update()
     # --- EVENTI ---
     toggle_cambia_tema = ft.Switch(label="Tema scuro", value=True, on_change=cambia_tema)
     pulsante_conferma_responsabile = ft.ElevatedButton("Conferma", on_click=conferma_responsabile)
 
     # Bottoni per la gestione dell'inserimento di una nuova auto
     # TODO
+    btnPress=ft.ElevatedButton("aggiungi automobile", on_click=clicca_bottone)
+    btnPress.color="blue"
 
     # --- LAYOUT ---
     page.add(
@@ -155,10 +133,13 @@ def main(page: ft.Page):
         # TODO
         ft.Divider(),
         ft.Text("aggiungi automobile", size=20),
-        ft.Row(spacing=50,
-               controls=[marca_input, modello_input, anno_input, contatore],
-               alignment=ft.MainAxisAlignment.CENTER),
-        btn_aggiungi_auto,
+        ft.Row(spacing=20,
+               controls=[marca_input, modello_input, anno_input,
+                         ft.IconButton(ft.Icons.REMOVE, on_click=minus_click, icon_color="red"),
+                contatore,
+                ft.IconButton(ft.Icons.ADD, on_click=plus_click, icon_color="green"),],
+               alignment=ft.MainAxisAlignment.CENTER), ft.Row(controls=[btnPress],
+                                                              alignment=ft.MainAxisAlignment.CENTER),
 
 
         # Sezione 4
